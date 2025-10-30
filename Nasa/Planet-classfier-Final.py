@@ -29,24 +29,22 @@ def load_models():
     model_dir = os.path.join(base_dir, "models")
 
     # Debug check — show what folder Streamlit is using
-    st.write("🔍 Model directory:", model_dir)
-    st.write("📁 Available files:", os.listdir(model_dir) if os.path.exists(model_dir) else "❌ Folder not found")
 
     try:
-        with open(os.path.join(model_dir, "binary_model.pkl"), "rb") as f:
+        with open(os.path.join( "binary_model.pkl"), "rb") as f:
             models['binary_model'] = pickle.load(f)
-        with open(os.path.join(model_dir, "scaler_binary.pkl"), "rb") as f:
+        with open(os.path.join( "scaler_binary.pkl"), "rb") as f:
             models['scaler_binary'] = pickle.load(f)
-        with open(os.path.join(model_dir, "poly_transformer_binary.pkl"), "rb") as f:
+        with open(os.path.join( "poly_transformer_binary.pkl"), "rb") as f:
             models['poly_binary'] = pickle.load(f)
 
-        with open(os.path.join(model_dir, "multiclass_model.pkl"), "rb") as f:
+        with open(os.path.join( "multiclass_model.pkl"), "rb") as f:
             models['multiclass_model'] = pickle.load(f)
-        with open(os.path.join(model_dir, "scaler_multiclass.pkl"), "rb") as f:
+        with open(os.path.join( "scaler_multiclass.pkl"), "rb") as f:
             models['scaler_multiclass'] = pickle.load(f)
-        with open(os.path.join(model_dir, "poly_transformer_multiclass.pkl"), "rb") as f:
+        with open(os.path.join( "poly_transformer_multiclass.pkl"), "rb") as f:
             models['poly_multiclass'] = pickle.load(f)
-        with open(os.path.join(model_dir, "label_encoder_multiclass.pkl"), "rb") as f:
+        with open(os.path.join( "label_encoder_multiclass.pkl"), "rb") as f:
             models['label_encoder'] = pickle.load(f)
 
         models['loaded'] = True
@@ -1449,6 +1447,7 @@ elif st.session_state.current_page == "Resources":
     # Other tabs would go here if needed, but based on your original code, they seem empty
 
 st.markdown('</div>', unsafe_allow_html=True)
+
 
 
 
