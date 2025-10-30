@@ -21,41 +21,44 @@ if 'current_page' not in st.session_state:
 # Load models and preprocessors
 @st.cache_resource
 def load_models():
-    """Load all models and preprocessors safely"""
+    """Load all models and preprocessors directly from /Nasa folder"""
     models = {}
     
-    # Base path of your app file
+    # Get directory of the current file (/Nasa)
     base_dir = os.path.dirname(os.path.abspath(__file__))
-    model_dir = os.path.join(base_dir, "models")
 
-    # Debug check — show what folder Streamlit is using
-    st.write("🔍 Model directory:", model_dir)
-    st.write("📁 Available files:", os.listdir(model_dir) if os.path.exists(model_dir) else "❌ Folder not found")
+    # Debug info (helps you confirm file visibility in Streamlit Cloud)
+    st.write("🔍 Base directory:", base_dir)
+    st.write("📁 Files in /Nasa:", os.listdir(base_dir))
 
     try:
-        with open(os.path.join(model_dir, "binary_model.pkl"), "rb") as f:
+        # Binary classification models
+        with open(os.path.join(base_dir, "binary_model.pkl"), "rb") as f:
             models['binary_model'] = pickle.load(f)
-        with open(os.path.join(model_dir, "scaler_binary.pkl"), "rb") as f:
+        with open(os.path.join(base_dir, "scaler_binary.pkl"), "rb") as f:
             models['scaler_binary'] = pickle.load(f)
-        with open(os.path.join(model_dir, "poly_transformer_binary.pkl"), "rb") as f:
+        with open(os.path.join(base_dir, "poly_transformer_binary.pkl"), "rb") as f:
             models['poly_binary'] = pickle.load(f)
 
-        with open(os.path.join(model_dir, "multiclass_model.pkl"), "rb") as f:
+        # Multi-class classification models
+        with open(os.path.join(base_dir, "multiclass_model.pkl"), "rb") as f:
             models['multiclass_model'] = pickle.load(f)
-        with open(os.path.join(model_dir, "scaler_multiclass.pkl"), "rb") as f:
+        with open(os.path.join(base_dir, "scaler_multiclass.pkl"), "rb") as f:
             models['scaler_multiclass'] = pickle.load(f)
-        with open(os.path.join(model_dir, "poly_transformer_multiclass.pkl"), "rb") as f:
+        with open(os.path.join(base_dir, "poly_transformer_multiclass.pkl"), "rb") as f:
             models['poly_multiclass'] = pickle.load(f)
-        with open(os.path.join(model_dir, "label_encoder_multiclass.pkl"), "rb") as f:
+        with open(os.path.join(base_dir, "label_encoder_multiclass.pkl"), "rb") as f:
             models['label_encoder'] = pickle.load(f)
 
         models['loaded'] = True
-        st.success("✅ All models loaded successfully!")
+        st.success("✅ All models successfully loaded from /Nasa!")
+
     except Exception as e:
-        st.error(f"❌ Failed to load models: {e}")
+        st.error(f"❌ Error loading models: {e}")
         models['loaded'] = False
 
     return models
+
 models = load_models()
 # Custom CSS with Teal/Cyan Theme
 st.markdown("""
@@ -1444,6 +1447,7 @@ elif st.session_state.current_page == "Resources":
     # Other tabs would go here if needed, but based on your original code, they seem empty
 
 st.markdown('</div>', unsafe_allow_html=True)
+
 
 
 
