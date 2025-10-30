@@ -24,30 +24,28 @@ def load_models():
     """Load all models and preprocessors"""
     models = {}
     
-    try:
-        # Binary model
-        with open('/binary_model.pkl', 'rb') as f:
+ try:
+        with open(os.path.join(model_dir, "binary_model.pkl"), "rb") as f:
             models['binary_model'] = pickle.load(f)
-        with open('/scaler_binary.pkl', 'rb') as f:
+        with open(os.path.join(model_dir, "scaler_binary.pkl"), "rb") as f:
             models['scaler_binary'] = pickle.load(f)
-        with open('/poly_transformer_binary.pkl', 'rb') as f:
+        with open(os.path.join(model_dir, "poly_transformer_binary.pkl"), "rb") as f:
             models['poly_binary'] = pickle.load(f)
-        
-        # Multi-class model
-        with open('/multiclass_model.pkl', 'rb') as f:
+
+        with open(os.path.join(model_dir, "multiclass_model.pkl"), "rb") as f:
             models['multiclass_model'] = pickle.load(f)
-        with open('/scaler_multiclass.pkl', 'rb') as f:
+        with open(os.path.join(model_dir, "scaler_multiclass.pkl"), "rb") as f:
             models['scaler_multiclass'] = pickle.load(f)
-        with open('/poly_transformer_multiclass.pkl', 'rb') as f:
+        with open(os.path.join(model_dir, "poly_transformer_multiclass.pkl"), "rb") as f:
             models['poly_multiclass'] = pickle.load(f)
-        with open('/label_encoder_multiclass.pkl', 'rb') as f:
+        with open(os.path.join(model_dir, "label_encoder_multiclass.pkl"), "rb") as f:
             models['label_encoder'] = pickle.load(f)
-        
+
         models['loaded'] = True
     except FileNotFoundError as e:
         st.warning(f"Model files not found: {e}")
         models['loaded'] = False
-    
+
     return models
 
 # Load models at startup
@@ -1442,6 +1440,7 @@ elif st.session_state.current_page == "Resources":
     # Other tabs would go here if needed, but based on your original code, they seem empty
 
 st.markdown('</div>', unsafe_allow_html=True)
+
 
 
 
