@@ -21,9 +21,17 @@ if 'current_page' not in st.session_state:
 # Load models and preprocessors
 @st.cache_resource
 def load_models():
-    """Load all models and preprocessors"""
+    """Load all models and preprocessors safely"""
     models = {}
     
+    # Base path of your app file
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    model_dir = os.path.join(base_dir, "models")
+
+    # Debug check — show what folder Streamlit is using
+    st.write("🔍 Model directory:", model_dir)
+    st.write("📁 Available files:", os.listdir(model_dir) if os.path.exists(model_dir) else "❌ Folder not found")
+
     try:
         with open(os.path.join(model_dir, "binary_model.pkl"), "rb") as f:
             models['binary_model'] = pickle.load(f)
@@ -42,8 +50,9 @@ def load_models():
             models['label_encoder'] = pickle.load(f)
 
         models['loaded'] = True
-    except FileNotFoundError as e:
-        st.warning(f"Model files not found: {e}")
+        st.success("✅ All models loaded successfully!")
+    except Exception as e:
+        st.error(f"❌ Failed to load models: {e}")
         models['loaded'] = False
 
     return models
@@ -1440,6 +1449,7 @@ elif st.session_state.current_page == "Resources":
     # Other tabs would go here if needed, but based on your original code, they seem empty
 
 st.markdown('</div>', unsafe_allow_html=True)
+
 
 
 
