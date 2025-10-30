@@ -26,9 +26,9 @@ def load_models():
     
     try:
         # Binary model
-        with open('Nasa/binary_model.pkl', 'rb') as f:
+        with open('/Nasa/binary_model.pkl', 'rb') as f:
             models['binary_model'] = pickle.load(f)
-        with open('Nasa/scaler_binary.pkl', 'rb') as f:
+        with open('/Nasa/scaler_binary.pkl', 'rb') as f:
             models['scaler_binary'] = pickle.load(f)
         with open('/Nasa/poly_transformer_binary.pkl', 'rb') as f:
             models['poly_binary'] = pickle.load(f)
@@ -1442,5 +1442,6 @@ elif st.session_state.current_page == "Resources":
     # Other tabs would go here if needed, but based on your original code, they seem empty
 
 st.markdown('</div>', unsafe_allow_html=True)
+
 
 
