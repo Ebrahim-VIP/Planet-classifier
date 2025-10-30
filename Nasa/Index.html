@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>3D Exoplanet System Simulator</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { 
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg,#0a0a23 0%,#1a1a3a 100%);
+  color:#fff;
+  overflow-x:hidden;
+}
+.container { width:100%; height:100vh; display:flex; flex-direction:column; }
+.header { 
+  padding:1rem 2rem;
+  background:rgba(0,0,0,0.5);
+  backdrop-filter: blur(10px);
+  border-bottom:2px solid rgba(23, 116, 144, 0.612);
+}
+.header h1 { color:#00d9ff; font-size:1.8rem; margin-bottom:.5rem; }
+.simulation-container { display:flex; flex:1; position:relative; }
+.system-view { flex:1; position:relative; border-right:2px solid rgba(41, 109, 124, 0.719); }
+.system-view:last-child { border-right:none; }
+.system-view.hidden { display:none; }
+#transit-system { display:none; }
+#transit-system.active { display:block; flex:none; width:100%; }
+.system-label {
+  position:absolute; top:10px; left:50%; transform:translateX(-50%);
+  background:rgba(0,0,0,0.7); padding:.5rem 1.5rem;
+  border-radius:20px; border:2px solid #00d9ff;
+  z-index:10; font-weight:bold; font-size:1.1rem;
+}
+canvas { display:block; width:100%; height:100%; }
+.controls {
+  position:absolute; bottom:20px; left:20px;
+  background:rgba(0,0,0,0.9); backdrop-filter: blur(10px);
+  padding:1rem; border-radius:10px;
+  border:2px solid rgba(89, 132, 202, 0.3);
+  width:320px; z-index:20;
+}
+.controls.collapsed { width:auto; }
+.controls.collapsed .control-content { display:none; }
+.control-header {
+  display:flex; justify-content:space-between; align-items:center;
+  margin-bottom:1rem;
+}
+.controls.collapsed .control-header { margin-bottom:0; }
+.control-header h3 { color:#00d9ff; font-size:1.1rem; }
+.toggle-btn {
+  background:none; border:none; color:#00d9ff;
+  cursor:pointer; font-size:1.2rem; padding:0;
+  width:auto; flex:none;
+}
+.control-content { }
+.control-group { margin-bottom:.8rem; }
+.control-group label {
+  display:block; margin-bottom:.3rem;
+  font-size:.85rem; color:#ccc;
+}
+.control-group input[type="range"] {
+  width:100%; height:6px; border-radius:3px;
+  background: rgba(255,255,255,0.1);
+  outline:none; -webkit-appearance:none;
+}
+.control-group input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance:none; appearance:none;
+  width:14px; height:14px; border-radius:50%;
+  background:#00d9ff; cursor:pointer;
+}
+.control-group input[type="range"]::-moz-range-thumb {
+  width:14px; height:14px; border-radius:50%;
+  background:#00d9ff; cursor:pointer; border:none;
+}
+.value-display {
+  display:inline-block; float:right;
+  color:#00d9ff; font-weight:bold;
+}
+.button-group { display:flex; gap:.5rem; margin-top:.8rem; flex-wrap:wrap; }
+button {
+  flex:1; padding:.5rem;
+  background: linear-gradient(45deg,#2abfd0,#00d9ff);
+  border:none; border-radius:6px;
+  color:white; font-weight:bold; font-size:.85rem;
+  cursor:pointer; transition:all .3s ease;
+  min-width:80px;
+}
+button:hover {
+  transform:translateY(-2px);
+  box-shadow: 0 5px 15px rgba(35, 125, 152, 0.4);
+}
+button.secondary { background: rgba(255,255,255,0.1); }
+.info-panel {
+  position:absolute; top:60px; right:10px;
+  background:rgba(0,0,0,0.8); padding:1rem;
+  border-radius:10px; border:1px solid rgba(53, 136, 159, 0.3);
+  min-width:200px; z-index:5; font-size:.85rem;
+}
+.info-panel h4 { color:#00d9ff; margin-bottom:.5rem; }
+.info-panel p { margin:.3rem 0; color:#ccc; }
+.transit-info {
+  position:absolute; bottom:10px; left:10px;
+  background:rgba(0,0,0,0.8); padding:.8rem;
+  border-radius:8px; border:1px solid rgba(53, 136, 159, 0.3);
+  z-index:5; font-size:.85rem;
+}
+.transit-info.active { border-color:#ff6b35; }
+.transit-info h4 { color:#00d9ff; margin-bottom:.3rem; font-size:.9rem; }
+.transit-info p { margin:.2rem 0; color:#ccc; }
+.transit-indicator {
+  display:inline-block; width:10px; height:10px;
+  border-radius:50%; margin-right:.5rem;
+  background:#666;
+}
+.transit-indicator.active { background:#ff6b35; animation:pulse 1s infinite; }
+@keyframes pulse {
+  0%, 100% { opacity:1; }
+  50% { opacity:0.5; }
+}
+.telescope-overlay {
+  position:absolute; top:0; left:0; right:0; bottom:0;
+  background:radial-gradient(circle at center, transparent 0%, transparent 22vh, black 22vh, black 100%);
+  pointer-events:none;
+  z-index:8;
+}
+.telescope-frame {
+  position:absolute; top:50%; left:50%;
+  transform:translate(-50%, -50%);
+  width:44vh; height:44vh;
+  border-radius:50%;
+  border:8px solid rgba(0, 217, 255, 0.4);
+  box-shadow: 
+    inset 0 0 30px rgba(0, 217, 255, 0.2),
+    0 0 40px rgba(0, 217, 255, 0.3),
+    inset 0 0 60px rgba(0, 0, 0, 0.5);
+  pointer-events:none;
+  z-index:9;
+  background:radial-gradient(circle, transparent 0%, transparent 100%);
+}
+.telescope-frame::before {
+  content:'';
+  position:absolute;
+  top:-12px; left:-12px; right:-12px; bottom:-12px;
+  border-radius:50%;
+  border:4px solid rgba(0, 217, 255, 0.2);
+  box-shadow: 0 0 20px rgba(0, 217, 255, 0.4);
+}
+.telescope-frame::after {
+  content:'';
+  position:absolute;
+  top:50%; left:50%;
+  transform:translate(-50%, -50%);
+  width:2px; height:100%;
+  background:linear-gradient(to bottom, transparent 0%, rgba(0, 217, 255, 0.1) 50%, transparent 100%);
+}
+.telescope-crosshair {
+  position:absolute;
+  top:50%; left:50%;
+  transform:translate(-50%, -50%);
+  width:100px; height:100px;
+  pointer-events:none;
+  z-index:10;
+}
+.telescope-crosshair::before,
+.telescope-crosshair::after {
+  content:'';
+  position:absolute;
+  background:rgba(0, 217, 255, 0.3);
+}
+.telescope-crosshair::before {
+  top:50%; left:0;
+  width:100%; height:1px;
+  transform:translateY(-50%);
+}
+.telescope-crosshair::after {
+  top:0; left:50%;
+  width:1px; height:100%;
+  transform:translateX(-50%);
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>🌌 3D Exoplanet System Simulator</h1>
+    <p>Real-time comparison: Earth-Sun System | Exoplanet System | Transit Detection View</p>
+  </div>
+  <div class="simulation-container">
+    <div class="system-view" id="earth-system">
+      <div class="system-label">🌍 Earth-Sun System</div>
+      <canvas id="canvas-earth"></canvas>
+    </div>
+    <div class="system-view" id="exo-system">
+      <div class="system-label">🪐 Exoplanet System</div>
+      <canvas id="canvas-exo"></canvas>
+      <div class="info-panel" id="exo-info">
+        <h4>Current Parameters</h4>
+        <p>Orbital Distance: <span id="info-orbit">1.00 AU</span></p>
+        <p>Planet Radius: <span id="info-radius">1.0 R⊕</span></p>
+        <p>Orbital Period: <span id="info-period">365 days</span></p>
+        <p>Temperature: <span id="info-temp">288 K</span></p>
+        <p>Star Temp: <span id="info-star-temp">5778 K</span></p>
+        <p>Insolation: <span id="info-insol">1.0</span></p>
+      </div>
+    </div>
+    <div class="system-view" id="transit-system">
+      <div class="system-label">🔭 Transit Detection View</div>
+      <div class="telescope-overlay">
+        <div class="telescope-frame">
+          <div class="telescope-crosshair"></div>
+        </div>
+      </div>
+      <canvas id="canvas-transit"></canvas>
+      <div class="transit-info" id="transit-info">
+        <h4><span class="transit-indicator" id="transit-indicator"></span>Transit Status</h4>
+        <p>Depth: <span id="transit-depth">0 ppm</span></p>
+        <p>Phase: <span id="transit-phase">--</span></p>
+      </div>
+    </div>
+  </div>
+  <div class="controls" id="controls-panel">
+    <div class="control-header">
+      <h3>⚙ Controls</h3>
+      <button class="toggle-btn" onclick="toggleControls()">−</button>
+    </div>
+    <div class="control-content">
+      <div class="control-group">
+        <label>Time Scale <span class="value-display" id="val-timescale">1.0x</span></label>
+        <input type="range" id="time-scale" min="0.1" max="100" step="0.1" value="1">
+      </div>
+      <div class="control-group">
+        <label>Camera Distance <span class="value-display" id="val-camera">50</span></label>
+        <input type="range" id="camera-distance" min="20" max="200" step="5" value="50">
+      </div>
+      <div class="button-group">
+        <button onclick="toggleAnimation()">⏯ Play</button>
+        <button class="secondary" onclick="toggleOrbits()">🔄 Orbits</button>
+        <button class="secondary" onclick="toggleTransitView()">🔭 Transit</button>
+        <button class="secondary" onclick="resetView()">↺ Reset</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+// Globals
+let earthScene, exoScene, transitScene;
+let earthCamera, exoCamera, transitCamera;
+let earthRenderer, exoRenderer, transitRenderer;
+let earthSystem = null, exoSystem = null, transitSystem = null;
+let animationId;
+let isAnimating = true;
+let showOrbits = true;
+let timeScale = 1;
+
+const INIT_CAM_Y = 30;
+const INIT_CAM_Z = 50;
+const CAM_RATIO = INIT_CAM_Y / INIT_CAM_Z;
+
+// Exoplanet parameters - defaults that can be updated via message
+let exoParams = {
+  orbitDistance: 1.0,
+  planetRadius: 1.0,
+  orbitalPeriod: 365,
+  planetTemp: 288,
+  impactParam: 0.5,
+  starTemp: 5778,
+  starRadius: 1.0,
+  insolation: 1.0,
+  transitDepth: 84
+};
+
+// Listen for parameter updates from parent window
+window.addEventListener('message', function(event) {
+  if (event.data && event.data.type === 'exoplanet_params') {
+    console.log('Received parameters:', event.data.params);
+    updateExoplanetParams(event.data.params);
+  }
+});
+
+function updateExoplanetParams(params) {
+  // Update parameters
+  if (params.orbitDistance !== undefined) exoParams.orbitDistance = params.orbitDistance;
+  if (params.planetRadius !== undefined) exoParams.planetRadius = params.planetRadius;
+  if (params.orbitalPeriod !== undefined) exoParams.orbitalPeriod = params.orbitalPeriod;
+  if (params.planetTemp !== undefined) exoParams.planetTemp = params.planetTemp;
+  if (params.impactParam !== undefined) exoParams.impactParam = params.impactParam;
+  if (params.starTemp !== undefined) exoParams.starTemp = params.starTemp;
+  if (params.starRadius !== undefined) exoParams.starRadius = params.starRadius;
+  if (params.insolation !== undefined) exoParams.insolation = params.insolation;
+  if (params.transitDepth !== undefined) exoParams.transitDepth = params.transitDepth;
+  
+  // Update UI info panel
+  document.getElementById('info-orbit').textContent = exoParams.orbitDistance.toFixed(2) + ' AU';
+  document.getElementById('info-radius').textContent = exoParams.planetRadius.toFixed(1) + ' R⊕';
+  document.getElementById('info-period').textContent = Math.round(exoParams.orbitalPeriod) + ' days';
+  document.getElementById('info-temp').textContent = Math.round(exoParams.planetTemp) + ' K';
+  document.getElementById('info-star-temp').textContent = Math.round(exoParams.starTemp) + ' K';
+  document.getElementById('info-insol').textContent = exoParams.insolation.toFixed(2);
+  
+  // Update visual systems
+  if (exoSystem) {
+    const scaledOrbitDist = 20 * exoParams.orbitDistance;
+    exoSystem.orbitDistance = scaledOrbitDist;
+    exoSystem.orbitPeriod = exoParams.orbitalPeriod;
+    
+    // Update planet size (scale appropriately for visibility)
+    const planetScale = Math.max(0.5, Math.min(3, exoParams.planetRadius));
+    exoSystem.planet.scale.set(planetScale, planetScale, planetScale);
+    
+    // Update orbit ring
+    const orbitGeometry = new THREE.RingGeometry(scaledOrbitDist - 0.2, scaledOrbitDist + 0.2, 64);
+    exoSystem.orbit.geometry.dispose();
+    exoSystem.orbit.geometry = orbitGeometry;
+    
+    // Update star color based on temperature
+    updateStarColor(exoSystem.star, exoSystem.glow, exoParams.starTemp);
+    
+    // Update planet color based on temperature
+    updatePlanetColor(exoSystem.planet, exoParams.planetTemp);
+  }
+  
+  if (transitSystem) {
+    const scaledOrbitDist = 20 * exoParams.orbitDistance;
+    transitSystem.orbitDistance = scaledOrbitDist;
+    transitSystem.orbitPeriod = exoParams.orbitalPeriod;
+    
+    const planetScale = Math.max(0.5, Math.min(3, exoParams.planetRadius));
+    transitSystem.planet.scale.set(planetScale, planetScale, planetScale);
+    
+    updateStarColor(transitSystem.star, transitSystem.glow, exoParams.starTemp);
+    updatePlanetColor(transitSystem.planet, exoParams.planetTemp);
+  }
+}
+
+function updateStarColor(star, glow, temp) {
+  let color;
+  if (temp < 3700) color = 0xff6600; // Red dwarf
+  else if (temp < 5200) color = 0xffaa00; // Orange
+  else if (temp < 6000) color = 0xffd700; // Yellow
+  else if (temp < 7500) color = 0xffffff; // White
+  else color = 0xaaccff; // Blue
+  
+  star.material.color.setHex(color);
+  star.material.emissive.setHex(color);
+  if (glow) {
+    glow.material.color.setHex(color);
+  }
+}
+
+function updatePlanetColor(planet, temp) {
+  let color;
+  if (temp < 200) color = 0x4444ff; // Ice world
+  else if (temp < 273) color = 0x6699ff; // Cold
+  else if (temp < 350) color = 0x2288ff; // Temperate
+  else if (temp < 600) color = 0xff6600; // Hot
+  else color = 0xff3300; // Very hot
+  
+  planet.material.color.setHex(color);
+}
+
+function init() {
+  initEarthSystem();
+  initExoSystem();
+  initTransitSystem();
+  setupControls();
+  applyCameraDistance(INIT_CAM_Z);
+  // Apply the exoParams immediately after init (for direct injection)
+  updateExoplanetParams(exoParams);
+  animate();
+}
+
+function initEarthSystem() {
+  const canvas = document.getElementById('canvas-earth');
+  const container = canvas.parentElement;
+  earthScene = new THREE.Scene();
+  earthCamera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+  earthCamera.position.set(0, INIT_CAM_Y, INIT_CAM_Z);
+  earthCamera.lookAt(0, 0, 0);
+  earthRenderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+  earthRenderer.setSize(container.clientWidth, container.clientHeight);
+  earthRenderer.setClearColor(0x000000, 1);
+  
+  createStarfield(earthScene);
+  
+  const sunGeometry = new THREE.SphereGeometry(5, 32, 32);
+  const sunMaterial = new THREE.MeshPhongMaterial({ color: 0xfdb813, emissive: 0xfdb813, shininess: 30 });
+  const sun = new THREE.Mesh(sunGeometry, sunMaterial);
+  earthScene.add(sun);
+  
+  const glow1 = new THREE.Mesh(
+    new THREE.SphereGeometry(5.5, 32, 32),
+    new THREE.MeshBasicMaterial({ color: 0xfdb813, transparent: true, opacity: 0.3 })
+  );
+  earthScene.add(glow1);
+  
+  const glow2 = new THREE.Mesh(
+    new THREE.SphereGeometry(6.2, 32, 32),
+    new THREE.MeshBasicMaterial({ color: 0xffa500, transparent: true, opacity: 0.15 })
+  );
+  earthScene.add(glow2);
+  
+  const glow3 = new THREE.Mesh(
+    new THREE.SphereGeometry(7, 32, 32),
+    new THREE.MeshBasicMaterial({ color: 0xffed4e, transparent: true, opacity: 0.08 })
+  );
+  earthScene.add(glow3);
+  
+  const earthGeometry = new THREE.SphereGeometry(1, 32, 32);
+  const earthMaterial = new THREE.MeshPhongMaterial({ color: 0x2233ff, emissive: 0x112244, shininess: 5 });
+  const earth = new THREE.Mesh(earthGeometry, earthMaterial);
+  earth.position.x = 20;
+  earthScene.add(earth);
+  
+  const orbitGeometry = new THREE.RingGeometry(19.8, 20.2, 64);
+  const orbitMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide, transparent: true, opacity: 0.3 });
+  const orbit = new THREE.Mesh(orbitGeometry, orbitMaterial);
+  orbit.rotation.x = Math.PI / 2;
+  earthScene.add(orbit);
+  
+  const light = new THREE.PointLight(0xffffff, 2, 100);
+  earthScene.add(light);
+  
+  earthSystem = { sun, earth, orbit, glow: glow1, angle: 0 };
+}
+
+function initExoSystem() {
+  const canvas = document.getElementById('canvas-exo');
+  const container = canvas.parentElement;
+  exoScene = new THREE.Scene();
+  exoCamera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+  exoCamera.position.set(0, INIT_CAM_Y, INIT_CAM_Z);
+  exoCamera.lookAt(0, 0, 0);
+  exoRenderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+  exoRenderer.setSize(container.clientWidth, container.clientHeight);
+  exoRenderer.setClearColor(0x000000, 1);
+  
+  createStarfield(exoScene);
+  
+  const starGeometry = new THREE.SphereGeometry(5, 32, 32);
+  const starMaterial = new THREE.MeshPhongMaterial({ color: 0xfdb813, emissive: 0xfdb813, shininess: 40 });
+  const star = new THREE.Mesh(starGeometry, starMaterial);
+  exoScene.add(star);
+  
+  const glow1 = new THREE.Mesh(
+    new THREE.SphereGeometry(5.5, 32, 32),
+    new THREE.MeshBasicMaterial({ color: 0xfdb813, transparent: true, opacity: 0.3 })
+  );
+  exoScene.add(glow1);
+  
+  const glow2 = new THREE.Mesh(
+    new THREE.SphereGeometry(6.2, 32, 32),
+    new THREE.MeshBasicMaterial({ color: 0xffa500, transparent: true, opacity: 0.15 })
+  );
+  exoScene.add(glow2);
+  
+  const glow3 = new THREE.Mesh(
+    new THREE.SphereGeometry(7, 32, 32),
+    new THREE.MeshBasicMaterial({ color: 0xffed4e, transparent: true, opacity: 0.08 })
+  );
+  exoScene.add(glow3);
+  
+  const planetGeometry = new THREE.SphereGeometry(1, 32, 32);
+  const planetMaterial = new THREE.MeshPhongMaterial({ color: 0xff6b35, emissive: 0x441100, shininess: 5 });
+  const planet = new THREE.Mesh(planetGeometry, planetMaterial);
+  planet.position.x = 20;
+  exoScene.add(planet);
+  
+  const orbitGeometry = new THREE.RingGeometry(19.8, 20.2, 64);
+  const orbitMaterial = new THREE.MeshBasicMaterial({ color: 0xff6b35, side: THREE.DoubleSide, transparent: true, opacity: 0.3 });
+  const orbit = new THREE.Mesh(orbitGeometry, orbitMaterial);
+  orbit.rotation.x = Math.PI / 2;
+  exoScene.add(orbit);
+  
+  const light = new THREE.PointLight(0xffffff, 2, 100);
+  exoScene.add(light);
+  
+  exoSystem = { star, planet, orbit, glow: glow1, angle: 0, orbitDistance: 20, orbitPeriod: 365 };
+}
+
+function initTransitSystem() {
+  const canvas = document.getElementById('canvas-transit');
+  const container = canvas.parentElement;
+  transitScene = new THREE.Scene();
+  transitCamera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+  transitCamera.position.set(0, 0, INIT_CAM_Z);
+  transitCamera.lookAt(0, 0, 0);
+  transitRenderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+  transitRenderer.setSize(container.clientWidth, container.clientHeight);
+  transitRenderer.setClearColor(0x000000, 1);
+  
+  createStarfield(transitScene);
+  
+  const starGeometry = new THREE.SphereGeometry(5, 32, 32);
+  const starMaterial = new THREE.MeshPhongMaterial({ color: 0xfdb813, emissive: 0xfdb813, shininess: 40 });
+  const star = new THREE.Mesh(starGeometry, starMaterial);
+  transitScene.add(star);
+  
+  const glow1 = new THREE.Mesh(
+    new THREE.SphereGeometry(5.5, 32, 32),
+    new THREE.MeshBasicMaterial({ color: 0xfdb813, transparent: true, opacity: 0.3 })
+  );
+  transitScene.add(glow1);
+  
+  const glow2 = new THREE.Mesh(
+    new THREE.SphereGeometry(6.2, 32, 32),
+    new THREE.MeshBasicMaterial({ color: 0xffa500, transparent: true, opacity: 0.15 })
+  );
+  transitScene.add(glow2);
+  
+  const glow3 = new THREE.Mesh(
+    new THREE.SphereGeometry(7, 32, 32),
+    new THREE.MeshBasicMaterial({ color: 0xffed4e, transparent: true, opacity: 0.08 })
+  );
+  transitScene.add(glow3);
+  
+  const planetGeometry = new THREE.SphereGeometry(1, 32, 32);
+  const planetMaterial = new THREE.MeshPhongMaterial({ color: 0xff6b35, emissive: 0x441100, shininess: 5 });
+  const planet = new THREE.Mesh(planetGeometry, planetMaterial);
+  planet.position.x = 20;
+  transitScene.add(planet);
+  
+  const light = new THREE.PointLight(0xffffff, 2, 100);
+  transitScene.add(light);
+  
+  transitSystem = { star, planet, glow: glow1, angle: 0, orbitDistance: 20, orbitPeriod: 365 };
+}
+
+function createStarfield(scene) {
+  const starGeometry = new THREE.BufferGeometry();
+  const starMaterial = new THREE.PointsMaterial({ color: 0xffffff, size: 0.5 });
+  const starVertices = [];
+  for (let i = 0; i < 1000; i++) {
+    starVertices.push(
+      (Math.random() - 0.5) * 200,
+      (Math.random() - 0.5) * 200,
+      (Math.random() - 0.5) * 200
+    );
+  }
+  starGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starVertices, 3));
+  const stars = new THREE.Points(starGeometry, starMaterial);
+  scene.add(stars);
+}
+
+function setupControls() {
+  document.getElementById('time-scale').addEventListener('input', (e) => {
+    const val = parseFloat(e.target.value);
+    document.getElementById('val-timescale').textContent = val.toFixed(1) + 'x';
+    timeScale = val;
+  });
+  
+  document.getElementById('camera-distance').addEventListener('input', (e) => {
+    const val = parseFloat(e.target.value);
+    document.getElementById('val-camera').textContent = val;
+    applyCameraDistance(val);
+  });
+}
+
+function applyCameraDistance(distance) {
+  const y = distance * CAM_RATIO;
+  if (earthCamera) {
+    earthCamera.position.set(0, y, distance);
+    earthCamera.lookAt(0, 0, 0);
+  }
+  if (exoCamera) {
+    exoCamera.position.set(0, y, distance);
+    exoCamera.lookAt(0, 0, 0);
+  }
+  if (transitCamera) {
+    transitCamera.position.set(0, 0, distance);
+    transitCamera.lookAt(0, 0, 0);
+  }
+}
+
+function checkTransit() {
+  if (!transitSystem) return false;
+  const planetZ = transitSystem.planet.position.z;
+  return planetZ > 0 && Math.abs(transitSystem.planet.position.x) < 8;
+}
+
+function animate() {
+  if (isAnimating) {
+    if (earthSystem) {
+      earthSystem.angle += 0.01 * timeScale;
+      earthSystem.earth.position.x = Math.cos(earthSystem.angle) * 20;
+      earthSystem.earth.position.z = Math.sin(earthSystem.angle) * 20;
+      earthSystem.earth.rotation.y += 0.02;
+    }
+    
+    if (exoSystem && transitSystem) {
+      const speed = (365 / Math.max(1, exoSystem.orbitPeriod)) * 0.01 * timeScale;
+      exoSystem.angle += speed;
+      transitSystem.angle = exoSystem.angle;
+      
+      exoSystem.planet.position.x = Math.cos(exoSystem.angle) * exoSystem.orbitDistance;
+      exoSystem.planet.position.z = Math.sin(exoSystem.angle) * exoSystem.orbitDistance;
+      exoSystem.planet.rotation.y += 0.02;
+      
+      transitSystem.planet.position.x = Math.cos(transitSystem.angle) * transitSystem.orbitDistance;
+      transitSystem.planet.position.z = Math.sin(transitSystem.angle) * transitSystem.orbitDistance;
+      transitSystem.planet.rotation.y += 0.02;
+      
+      const inTransit = checkTransit();
+      const indicator = document.getElementById('transit-indicator');
+      const transitInfo = document.getElementById('transit-info');
+      const phaseText = document.getElementById('transit-phase');
+      
+      if (inTransit) {
+        indicator.classList.add('active');
+        transitInfo.classList.add('active');
+        phaseText.textContent = 'In Transit';
+        document.getElementById('transit-depth').textContent = exoParams.transitDepth.toFixed(0) + ' ppm';
+      } else {
+        indicator.classList.remove('active');
+        transitInfo.classList.remove('active');
+        phaseText.textContent = 'No Transit';
+        document.getElementById('transit-depth').textContent = '0 ppm';
+      }
+    }
+  }
+  
+  if (earthRenderer && earthScene && earthCamera) earthRenderer.render(earthScene, earthCamera);
+  if (exoRenderer && exoScene && exoCamera) exoRenderer.render(exoScene, exoCamera);
+  if (transitRenderer && transitScene && transitCamera) transitRenderer.render(transitScene, transitCamera);
+  animationId = requestAnimationFrame(animate);
+}
+
+function toggleTransitView() {
+  const earthSystem = document.getElementById('earth-system');
+  const exoSystem = document.getElementById('exo-system');
+  const transitSystem = document.getElementById('transit-system');
+  
+  if (transitSystem.classList.contains('active')) {
+    transitSystem.classList.remove('active');
+    earthSystem.classList.remove('hidden');
+    exoSystem.classList.remove('hidden');
+  } else {
+    transitSystem.classList.add('active');
+    earthSystem.classList.add('hidden');
+    exoSystem.classList.add('hidden');
+  }
+  
+  setTimeout(() => {
+    window.dispatchEvent(new Event('resize'));
+  }, 50);
+}
+
+function toggleAnimation() { isAnimating = !isAnimating; }
+
+function toggleOrbits() {
+  showOrbits = !showOrbits;
+  if (earthSystem && earthSystem.orbit) earthSystem.orbit.material.opacity = showOrbits ? 0.3 : 0;
+  if (exoSystem && exoSystem.orbit) exoSystem.orbit.material.opacity = showOrbits ? 0.3 : 0;
+}
+
+function toggleControls() {
+  const panel = document.getElementById('controls-panel');
+  const btn = panel.querySelector('.toggle-btn');
+  panel.classList.toggle('collapsed');
+  btn.textContent = panel.classList.contains('collapsed') ? '+' : '−';
+}
+
+function resetView() {
+  document.getElementById('time-scale').value = '1';
+  document.getElementById('camera-distance').value = INIT_CAM_Z.toString();
+  document.querySelectorAll('input[type="range"]').forEach(input => 
+    input.dispatchEvent(new Event('input'))
+  );
+}
+
+window.addEventListener('resize', () => {
+  const earthContainer = document.getElementById('earth-system');
+  const exoContainer = document.getElementById('exo-system');
+  const transitContainer = document.getElementById('transit-system');
+  
+  if (earthCamera && earthContainer) {
+    earthCamera.aspect = earthContainer.clientWidth / earthContainer.clientHeight;
+    earthCamera.updateProjectionMatrix();
+    if (earthRenderer) earthRenderer.setSize(earthContainer.clientWidth, earthContainer.clientHeight);
+  }
+  
+  if (exoCamera && exoContainer) {
+    exoCamera.aspect = exoContainer.clientWidth / exoContainer.clientHeight;
+    exoCamera.updateProjectionMatrix();
+    if (exoRenderer) exoRenderer.setSize(exoContainer.clientWidth, exoContainer.clientHeight);
+  }
+  
+  if (transitCamera && transitContainer) {
+    transitCamera.aspect = transitContainer.clientWidth / transitContainer.clientHeight;
+    transitCamera.updateProjectionMatrix();
+    if (transitRenderer) transitRenderer.setSize(transitContainer.clientWidth, transitContainer.clientHeight);
+  }
+});
+
+window.addEventListener('load', init);
+</script>
+</body>
+</html>

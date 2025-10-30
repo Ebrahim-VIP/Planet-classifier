@@ -1,0 +1,36 @@
+
+MULTI-CLASS EXOPLANET CLASSIFICATION MODEL
+==========================================
+
+Model Information:
+- Model Type: XGBoost
+- Test Accuracy: 0.9488
+- Training Date: 2025-10-04 09:52:15
+- Classes: ['CANDIDATE', 'CONFIRMED', 'FALSE POSITIVE']
+
+Required Input Features (8):
+1. koi_fpflag_ss      - Stellar Eclipse Flag (0 or 1)
+2. koi_fpflag_co      - Centroid Offset Flag (0 or 1)
+3. koi_dikco_msky     - PRF Angular Offset from KIC (arcseconds)
+4. koi_dicco_msky     - PRF Angular Offset OOT (arcseconds)
+5. koi_smet_err2      - Stellar Metallicity Error (negative)
+6. earth_similarity   - Earth Similarity Index (calculated)
+7. log_snr           - Log Signal-to-Noise Ratio (calculated)
+8. koi_count         - Number of Planets in System
+
+Calculated Features (need raw inputs):
+- earth_similarity: requires koi_prad, koi_teq
+- log_snr: requires koi_model_snr
+
+Pipeline Steps:
+1. Collect 8 features (calculate earth_similarity and log_snr)
+2. StandardScaler transformation
+3. PolynomialFeatures (degree=2, interaction_only=True)
+4. Model prediction
+
+Files needed for deployment:
+- multiclass_model.pkl
+- scaler_multiclass.pkl
+- poly_transformer_multiclass.pkl
+- label_encoder_multiclass.pkl
+- feature_names_multiclass.pkl
