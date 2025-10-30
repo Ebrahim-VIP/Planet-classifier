@@ -56,6 +56,7 @@ def load_models():
         models['loaded'] = False
 
     return models
+models = load_models()
 # Custom CSS with Teal/Cyan Theme
 st.markdown("""
 <style>
@@ -1443,6 +1444,7 @@ elif st.session_state.current_page == "Resources":
     # Other tabs would go here if needed, but based on your original code, they seem empty
 
 st.markdown('</div>', unsafe_allow_html=True)
+
 
 
 
