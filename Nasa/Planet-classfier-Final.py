@@ -730,21 +730,21 @@ elif st.session_state.current_page == "Classification":
     # 3D Visualization section
     st.markdown("## 🌌 3D Visualization & Simulation")
     
-base_dir = os.path.dirname(os.path.abspath(__file__))
-html_path = os.path.join(base_dir, "Index.html")
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    html_path = os.path.join(base_dir, "Index.html")
 
-if submitted and os.path.exists(html_path):
+    if submitted and os.path.exists(html_path):
     # Prepare parameters to send to simulation
-    params = {
-        "orbitDistance": float(orbit_distance),
-        "planetRadius": float(koi_prad),
-        "orbitalPeriod": float(orbital_period),
-        "planetTemp": float(koi_teq),
-        "impactParam": float(impact_param),
-        "starTemp": float(star_temp),
-        "starRadius": float(star_radius),
-        "insolation": float(insolation),
-        "transitDepth": float(transit_depth)
+        params = {
+            "orbitDistance": float(orbit_distance),
+            "planetRadius": float(koi_prad),
+            "orbitalPeriod": float(orbital_period),
+            "planetTemp": float(koi_teq),
+            "impactParam": float(impact_param),
+            "starTemp": float(star_temp),
+            "starRadius": float(star_radius),
+            "insolation": float(insolation),
+            "transitDepth": float(transit_depth)
     }
 
     # Load Index.html directly from the same folder
@@ -1454,6 +1454,7 @@ elif st.session_state.current_page == "Resources":
     # Other tabs would go here if needed, but based on your original code, they seem empty
 
 st.markdown('</div>', unsafe_allow_html=True)
+
 
 
 
