@@ -394,8 +394,6 @@ if st.session_state.current_page == "Home":
 elif st.session_state.current_page == "Classification":
     st.title("🔬 Exoplanet Classification & Visualization")
     
-    if not models.get('loaded', False):
-        st.warning("⚠ Models not loaded. Using demo mode with placeholder predictions.")
     
     # Classification type selector
     st.markdown("### 🎯 Select Classification Type")
@@ -1445,6 +1443,7 @@ elif st.session_state.current_page == "Resources":
     # Other tabs would go here if needed, but based on your original code, they seem empty
 
 st.markdown('</div>', unsafe_allow_html=True)
+
 
 
 
