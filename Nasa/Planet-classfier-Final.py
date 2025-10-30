@@ -726,8 +726,7 @@ elif st.session_state.current_page == "Classification":
             st.info("👆 Enter parameters and click 'Classify Planet' to see results")
     
     st.markdown("---")
-    
-    # 3D Visualization section
+         # 3D Visualization section
     st.markdown("## 🌌 3D Visualization & Simulation")
     
     base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -767,42 +766,42 @@ elif st.session_state.current_page == "Classification":
 
     components.html(sim_html, height=800, scrolling=False)
 
-elif os.path.exists(html_path):
-    st.info("👆 Submit the classification form to view the 3D simulation with your parameters")
-else:
-    st.warning("⚠️ 3D visualization file (Index.html) not found in /Nasa folder")
+    elif os.path.exists(html_path):
+        st.info("👆 Submit the classification form to view the 3D simulation with your parameters")
+    else:
+        st.warning("⚠️ 3D visualization file (Index.html) not found in /Nasa folder")
 
-st.markdown("---")
+    st.markdown("---")
 
 # --- Comparison Section ---
-if submitted:
-    st.markdown("### 📊 System Comparison")
-    col1, col2 = st.columns(2)
+    if submitted:
+        st.markdown("### 📊 System Comparison")
+        col1, col2 = st.columns(2)
 
-    with col1:
-        st.markdown("""
-        <div class="comparison-card">
-            <h4>🌍 Earth System</h4>
-            <p><strong>Orbital Period:</strong> 365.25 days</p>
-            <p><strong>Distance from Star:</strong> 1 AU</p>
-            <p><strong>Planet Radius:</strong> 1.0 Earth radii</p>
-            <p><strong>Temperature:</strong> 288 K</p>
-            <p><strong>Insolation:</strong> 1.0</p>
-        </div>
-        """, unsafe_allow_html=True)
+        with col1:
+            st.markdown("""
+            <div class="comparison-card">
+                <h4>🌍 Earth System</h4>
+                <p><strong>Orbital Period:</strong> 365.25 days</p>
+                <p><strong>Distance from Star:</strong> 1 AU</p>
+                <p><strong>Planet Radius:</strong> 1.0 Earth radii</p>
+                <p><strong>Temperature:</strong> 288 K</p>
+                <p><strong>Insolation:</strong> 1.0</p>
+            </div>
+            """, unsafe_allow_html=True)
 
-    with col2:
-        st.markdown(f"""
-        <div class="comparison-card">
-            <h4>🪐 Your Exoplanet</h4>
-            <p><strong>Orbital Period:</strong> {orbital_period:.1f} days</p>
-            <p><strong>Distance from Star:</strong> {orbit_distance:.2f} AU</p>
-            <p><strong>Planet Radius:</strong> {koi_prad:.2f} Earth radii</p>
-            <p><strong>Temperature:</strong> {koi_teq} K</p>
-            <p><strong>Insolation:</strong> {insolation:.2f}</p>
-            <p><strong>Transit Depth:</strong> {transit_depth:.0f} ppm</p>
-        </div>
-        """, unsafe_allow_html=True)
+        with col2:
+            st.markdown(f"""
+            <div class="comparison-card">
+                <h4>🪐 Your Exoplanet</h4>
+                <p><strong>Orbital Period:</strong> {orbital_period:.1f} days</p>
+                <p><strong>Distance from Star:</strong> {orbit_distance:.2f} AU</p>
+                <p><strong>Planet Radius:</strong> {koi_prad:.2f} Earth radii</p>
+                <p><strong>Temperature:</strong> {koi_teq} K</p>
+                <p><strong>Insolation:</strong> {insolation:.2f}</p>
+                <p><strong>Transit Depth:</strong> {transit_depth:.0f} ppm</p>
+            </div>
+            """, unsafe_allow_html=True)
 # ============================================================================
 # RESEARCH PAGE
 # ============================================================================
@@ -1454,6 +1453,7 @@ elif st.session_state.current_page == "Resources":
     # Other tabs would go here if needed, but based on your original code, they seem empty
 
 st.markdown('</div>', unsafe_allow_html=True)
+
 
 
 
