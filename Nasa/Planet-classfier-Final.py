@@ -910,7 +910,7 @@ elif st.session_state.current_page == "Research":
                             import time
                             
                             # Load dataset
-                            data_path = "C:/Ebrahim/Nasa/cumulative_2025.10.02_20.38.17.csv"
+                            data_path = os.path.join(base_dir, "cumulative_2025.10.02_20.38.17.csv")
                             if not os.path.exists(data_path):
                                 st.error(f"Dataset not found: {data_path}")
                             else:
@@ -1496,6 +1496,7 @@ elif st.session_state.current_page == "Resources":
     # Other tabs would go here if needed, but based on your original code, they seem empty
 
 st.markdown('</div>', unsafe_allow_html=True)
+
 
 
 
