@@ -728,40 +728,39 @@ elif st.session_state.current_page == "Classification":
     st.markdown("---")
          # 3D Visualization section
     st.markdown("## 🌌 3D Visualization & Simulation")
-    
     base_dir = os.path.dirname(os.path.abspath(__file__))
     html_path = os.path.join(base_dir, "Index.html")
 
     if submitted and os.path.exists(html_path):
     # Prepare parameters to send to simulation
         params = {
-            "orbitDistance": float(orbit_distance),
-            "planetRadius": float(koi_prad),
-            "orbitalPeriod": float(orbital_period),
-            "planetTemp": float(koi_teq),
-            "impactParam": float(impact_param),
-            "starTemp": float(star_temp),
-            "starRadius": float(star_radius),
-            "insolation": float(insolation),
-            "transitDepth": float(transit_depth)
+        "orbitDistance": float(orbit_distance),
+        "planetRadius": float(koi_prad),
+        "orbitalPeriod": float(orbital_period),
+        "planetTemp": float(koi_teq),
+        "impactParam": float(impact_param),
+        "starTemp": float(star_temp),
+        "starRadius": float(star_radius),
+        "insolation": float(insolation),
+        "transitDepth": float(transit_depth)
     }
 
     # Load Index.html directly from the same folder
-    with open(html_path, "r", encoding="utf-8") as f:
-        sim_html = f.read()
+        with open(html_path, "r", encoding="utf-8") as f:
+            sim_html = f.read()
 
     # Replace the default exoParams in HTML with actual params
-    params_js = json.dumps(params)
-    start_marker = "let exoParams = {"
-    end_marker = "};"
-    start_index = sim_html.find(start_marker)
-    if start_index != -1:
-        end_index = sim_html.find(end_marker, start_index) + len(end_marker)
-        if end_index != -1:
-            sim_html = (
-                sim_html[:start_index]
-                + f"let exoParams = {params_js};"
-                + sim_html[end_index:]
+        params_js = json.dumps(params)
+        start_marker = "let exoParams = {"
+        end_marker = "};"
+        start_index = sim_html.find(start_marker)
+        if start_index != -1:
+            end_index = sim_html.find(end_marker, start_index) + len(end_marker)
+            if end_index != -1:
+                sim_html = (
+                    sim_html[:start_index]
+                    + f"let exoParams = {params_js};"
+                    + sim_html[end_index:]
             )
 
     components.html(sim_html, height=800, scrolling=False)
@@ -779,29 +778,32 @@ elif st.session_state.current_page == "Classification":
         col1, col2 = st.columns(2)
 
         with col1:
-            st.markdown("""
-            <div class="comparison-card">
-                <h4>🌍 Earth System</h4>
-                <p><strong>Orbital Period:</strong> 365.25 days</p>
-                <p><strong>Distance from Star:</strong> 1 AU</p>
-                <p><strong>Planet Radius:</strong> 1.0 Earth radii</p>
-                <p><strong>Temperature:</strong> 288 K</p>
-                <p><strong>Insolation:</strong> 1.0</p>
-            </div>
-            """, unsafe_allow_html=True)
+        st.markdown("""
+        <div class="comparison-card">
+            <h4>🌍 Earth System</h4>
+            <p><strong>Orbital Period:</strong> 365.25 days</p>
+            <p><strong>Distance from Star:</strong> 1 AU</p>
+            <p><strong>Planet Radius:</strong> 1.0 Earth radii</p>
+            <p><strong>Temperature:</strong> 288 K</p>
+            <p><strong>Insolation:</strong> 1.0</p>
+        </div>
+        """, unsafe_allow_html=True)
 
         with col2:
-            st.markdown(f"""
-            <div class="comparison-card">
-                <h4>🪐 Your Exoplanet</h4>
-                <p><strong>Orbital Period:</strong> {orbital_period:.1f} days</p>
-                <p><strong>Distance from Star:</strong> {orbit_distance:.2f} AU</p>
-                <p><strong>Planet Radius:</strong> {koi_prad:.2f} Earth radii</p>
-                <p><strong>Temperature:</strong> {koi_teq} K</p>
-                <p><strong>Insolation:</strong> {insolation:.2f}</p>
-                <p><strong>Transit Depth:</strong> {transit_depth:.0f} ppm</p>
-            </div>
-            """, unsafe_allow_html=True)
+        st.markdown(f"""
+        <div class="comparison-card">
+            <h4>🪐 Your Exoplanet</h4>
+            <p><strong>Orbital Period:</strong> {orbital_period:.1f} days</p>
+            <p><strong>Distance from Star:</strong> {orbit_distance:.2f} AU</p>
+            <p><strong>Planet Radius:</strong> {koi_prad:.2f} Earth radii</p>
+            <p><strong>Temperature:</strong> {koi_teq} K</p>
+            <p><strong>Insolation:</strong> {insolation:.2f}</p>
+            <p><strong>Transit Depth:</strong> {transit_depth:.0f} ppm</p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    
+        
 # ============================================================================
 # RESEARCH PAGE
 # ============================================================================
@@ -1453,6 +1455,7 @@ elif st.session_state.current_page == "Resources":
     # Other tabs would go here if needed, but based on your original code, they seem empty
 
 st.markdown('</div>', unsafe_allow_html=True)
+
 
 
 
