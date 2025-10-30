@@ -28,8 +28,7 @@ def load_models():
     base_dir = os.path.dirname(os.path.abspath(__file__))
 
     # Debug info (helps you confirm file visibility in Streamlit Cloud)
-    st.write("🔍 Base directory:", base_dir)
-    st.write("📁 Files in /Nasa:", os.listdir(base_dir))
+   
 
     try:
         # Binary classification models
@@ -1455,6 +1454,7 @@ elif st.session_state.current_page == "Resources":
     # Other tabs would go here if needed, but based on your original code, they seem empty
 
 st.markdown('</div>', unsafe_allow_html=True)
+
 
 
 
