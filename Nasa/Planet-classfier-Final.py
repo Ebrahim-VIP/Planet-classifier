@@ -24,7 +24,7 @@ def load_models():
     """Load all models and preprocessors"""
     models = {}
     
- try:
+    try:
         with open(os.path.join(model_dir, "binary_model.pkl"), "rb") as f:
             models['binary_model'] = pickle.load(f)
         with open(os.path.join(model_dir, "scaler_binary.pkl"), "rb") as f:
@@ -1440,6 +1440,7 @@ elif st.session_state.current_page == "Resources":
     # Other tabs would go here if needed, but based on your original code, they seem empty
 
 st.markdown('</div>', unsafe_allow_html=True)
+
 
 
 
