@@ -44,7 +44,7 @@ def load_models():
             models['multiclass_model'] = pickle.load(f)
         with open(os.path.join(base_dir, "scaler_binary.pkl"), "rb") as f:
             models['scaler_multiclass'] = pickle.load(f)
-        with open(os.path.join(base_dir, "poly_transformer_binary.pkl"), "rb") as f:
+        with open(os.path.join(base_dir, "poly_transformer_multiclass.pkl"), "rb") as f:
             models['poly_multiclass'] = pickle.load(f)
         with open(os.path.join(base_dir, "label_encoder_multiclass.pkl"), "rb") as f:
             models['label_encoder'] = pickle.load(f)
