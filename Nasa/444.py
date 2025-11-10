@@ -36,7 +36,7 @@ def load_models():
         # Multi-class model
         with open('/Ebrahim/Nasa/multiclass_model.pkl', 'rb') as f:
             models['multiclass_model'] = pickle.load(f)
-        with open('/Ebrahim/Nasa/scaler_multiclass.pkl', 'rb') as f:
+        with open('/Ebrahim/Nasa/scaler_binary.pkl', 'rb') as f:
             models['scaler_multiclass'] = pickle.load(f)
         with open('/Ebrahim/Nasa/poly_transformer_multiclass.pkl', 'rb') as f:
             models['poly_multiclass'] = pickle.load(f)
@@ -1440,5 +1440,6 @@ elif st.session_state.current_page == "Resources":
             """)
     
     # Other tabs would go here if needed, but based on your original code, they seem empty
+
 
 st.markdown('</div>', unsafe_allow_html=True)
